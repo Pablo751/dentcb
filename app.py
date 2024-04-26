@@ -49,7 +49,10 @@ def count_keyword_matches_script2(row, main_keywords):
 # Streamlit interface
 st.title("Keyword Matching Script")
 question = st.text_input("Please enter your query:")
-uploaded_file = st.file_uploader("Choose a CSV file")
+
+# Load the CSV file from the same directory as the script
+with open('FRdata.csv', mode='r', encoding='utf-8') as file:
+    reader = csv.DictReader(file)
 
 if uploaded_file is not None:
     if st.button("Submit"):
