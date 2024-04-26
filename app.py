@@ -3,6 +3,9 @@ import csv
 from openai import OpenAI
 import difflib
 import io
+import os
+
+openai_api_key = os.environ['OPENAI_API_KEY']
 
 # Instantiate the client
 client = OpenAI()
