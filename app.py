@@ -49,7 +49,7 @@ def count_keyword_matches_script2(row, main_keywords):
     return score, row['url']
 
 # Streamlit interface
-st.title("Keyword Matching Script")
+st.title("Dentaly chatbot prototype (FR)")
 question = st.text_input("Please enter your query:")
 
 # Load the CSV file from the same directory as the script
