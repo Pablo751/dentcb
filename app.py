@@ -31,7 +31,7 @@ country_choice = st.selectbox("Please select a country:", options=list(csv_files
 csv_file_path = csv_files.get(country_choice)
 
 # Prompt the user for their question via Streamlit
-question = st.text_input("Please enter your question:")
+question = input("Please enter your question: ").strip()
 
 # Load and cache data based on the selected country
 def load_data(csv_file_path):
@@ -137,22 +137,15 @@ def choose_best_url(question, scored_urls):
     for idx, (score, url, title, meta) in enumerate(scored_urls, 1):
         prompt += f"{idx}. URL: {url}, Title: {title}, Meta: {meta}\n"
 
-    prompt += "\nWhich URL is the most appropriate for the question?"
+    prompt += "\nWhich URL is the most appropriate for the question? Please provide the URL only."
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": prompt}]
     )
 
-    chosen_response = response.choices[0].message.content.strip()
-    try:
-        lines = chosen_response.split('\n')
-        for line in lines:
-            if "URL:" in line:
-                chosen_url = line.split('URL:')[1].strip()
-                return chosen_url
-    except IndexError:
-        return None
+    chosen_url = response.choices[0].message.content.strip()
+    return chosen_url
 
 def provide_detailed_answer(question, final_url, data):
     if not final_url:
