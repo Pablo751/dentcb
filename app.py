@@ -36,15 +36,19 @@ question = st.text_input("Please enter your question:")
 # Load and cache data based on the selected country
 def load_data(csv_file_path):
     if not st.session_state['data_loaded'] or st.session_state['csv_file_path'] != csv_file_path:
-        with open(csv_file_path, mode='r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            st.session_state['data'] = list(reader)  # Read the entire CSV file into a list
-        st.session_state['data_loaded'] = True
-        st.session_state['csv_file_path'] = csv_file_path
-
-# Ensure data is loaded appropriately
-if csv_file_path:
-    load_data(csv_file_path)
+        try:
+            with open(csv_file_path, mode='r', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                st.session_state['data'] = list(reader)  # Read the entire CSV file into a list
+            st.session_state['data_loaded'] = True
+            st.session_state['csv_file_path'] = csv_file_path
+            print(f"Data loaded successfully from {csv_file_path}")
+        except FileNotFoundError:
+            st.error(f"File not found: {csv_file_path}")
+            st.session_state['data_loaded'] = False
+            st.session_state['data'] = None
+    else:
+        print(f"Data already loaded from {csv_file_path}")
 
 # Function to extract the main keywords using the GPT model
 def extract_main_keywords(question):
@@ -114,6 +118,7 @@ def count_keyword_matches_script2(row, main_keywords):
 
 def find_best_match(question, data):
     main_keywords = extract_main_keywords(question)
+    print(f"Selected main keywords: {main_keywords}")  # Print the selected main keywords
     scored_urls = []
     
     for row in data:
