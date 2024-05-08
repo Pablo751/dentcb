@@ -61,12 +61,6 @@ def extract_main_keywords(question):
     main_keywords = [kw.strip("'\"") for kw in main_keywords]
     return set(main_keywords)
 
-# Read the CSV file for the selected country
-if csv_file_path:
-    with open(csv_file_path, mode='r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        data = list(reader)  # Read the entire CSV file into a list
-
 # Function to count keyword matches in the top_queries and score them
 def count_keyword_matches_script1(row, main_keywords):
     top_queries = set(row['top_queries'].lower().split(', '))
@@ -188,12 +182,19 @@ if st.button("Find Best Match"):
     if not question or not csv_file_path:
         st.write("Please make sure to select a country and enter a question.")
     else:
-        scored_urls = find_best_match(question, st.session_state['data'])
-        final_url = choose_best_url(question, scored_urls)
-        if final_url:
-            st.write("Chosen URL:", final_url)
-            detailed_answer = provide_detailed_answer(question, final_url, st.session_state['data'])
-            st.write("Detailed Answer:", detailed_answer)
+        # Load the data
+        load_data(csv_file_path)
+        
+        # Check if data is loaded successfully
+        if st.session_state['data_loaded'] and st.session_state['data']:
+            scored_urls = find_best_match(question, st.session_state['data'])
+            final_url = choose_best_url(question, scored_urls)
+            if final_url:
+                st.write("Chosen URL:", final_url)
+                detailed_answer = provide_detailed_answer(question, final_url, st.session_state['data'])
+                st.write("Detailed Answer:", detailed_answer)
+            else:
+                st.write("No URL could be selected based on the question.")
         else:
-            st.write("No URL could be selected based on the question.")
+            st.write("Failed to load data. Please check the CSV file path.")
 
