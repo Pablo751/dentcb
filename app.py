@@ -95,7 +95,7 @@ def count_keyword_matches_script2(row, main_keywords):
     meta = row['meta'].lower().split(' ')
     url = row['url'].lower().replace('-', ' ').split(' ')
     score = 0
-    similarity_threshold = 0.5
+    similarity_threshold = 0.6
 
     def score_based_on_similarity(field_list, multiplier=1):
         field_score = 0
