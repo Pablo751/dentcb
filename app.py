@@ -31,7 +31,7 @@ country_choice = st.selectbox("Please select a country:", options=list(csv_files
 csv_file_path = csv_files.get(country_choice)
 
 # Prompt the user for their question via Streamlit
-question = input("Please enter your question: ").strip()
+question = input("Please enter your question: ")
 
 # Load and cache data based on the selected country
 def load_data(csv_file_path):
