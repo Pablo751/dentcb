@@ -48,7 +48,7 @@ if csv_file_path:
 
 # Function to extract the main keywords using the GPT model
 def extract_main_keywords(question):
-    prompt = f"What are the main keyword or keywords of this question: '{question}'. Only choose one keyword, the most relevant to dental topics."
+    prompt = f"What are the main keyword or keywords of this question: '{question}'. Only choose one keyword, the most relevant to dental topics. For example, lets say you identify ['brosse à dents en bambou', 'efficace'], in this case, you should only select at the end 'brosse à dents en bambou'"
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": prompt}]
