@@ -160,7 +160,7 @@ def provide_detailed_answer(question, final_url, data):
     prompt = f"Question: {question}\n\n"
     prompt += f"Selected URL: {final_url}\n\n"
     prompt += f"Page Detail: {page_detail}\n\n"
-    prompt += "Based on the Page Detail information, provide a comprehensive answer to the question. Always answer in the content original language"
+    prompt += "Based on the Page Detail information, provide a comprehensive answer to the question. Always answer in the content original language."
     
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
