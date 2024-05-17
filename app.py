@@ -13,7 +13,7 @@ client = OpenAI()
 # Define the CSV files based on country selection
 csv_files = {
     'France': 'Dentaly URLS - Dentaly FR.csv',
-    'US': 'Dentaly URLS - Dentaly US.csv',
+    'US': '/Users/juanpablocasadobissone/Downloads/Dentaly URLS - Dentaly US.csv',
     'UK': 'Dentaly URLS - Dentaly UK.csv',
     'Germany': 'Dentaly URLS - Dentaly DE.csv',
     'Spain': 'Dentaly URLS - Dentaly ES.csv',
@@ -91,7 +91,7 @@ def count_keyword_matches_script1(row, main_keywords):
             if any(kw in field_item for kw in main_keywords):
                 field_score += partial_match_score * multiplier
             if any(kw == field_item for kw in main_keywords):
-                field_score += (exact_match_score - partial_match_score) * multiplier
+                field_score += (exact match_score - partial match_score) * multiplier
         return field_score
 
     score += score_matches(top_queries)
@@ -142,27 +142,26 @@ def find_best_match(question, data):
 
     return scored_urls
 
-def choose_best_urls(question, scored_urls, count=3):
+def choose_best_url(question, scored_urls):
     if not scored_urls:
-        return None, []
+        return None
 
     prompt = f"Question: {question}\n\n"
     prompt += "Here are the possible answers based on relevance:\n"
     for idx, (score, url, title, meta) in enumerate(scored_urls, 1):
         prompt += f"{idx}. URL: {url}, Title: {title}, Meta: {meta}\n"
 
-    prompt += "\nWhich URLs are the most appropriate for the question? Please provide the top URL followed by the next best two URLs."
+    prompt += "\nWhich URL is the most appropriate for the question? Please provide the URL only."
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": prompt}]
     )
 
-    chosen_urls = response.choices[0].message.content.strip().split('\n')
-    main_url = chosen_urls[0].strip()
-    related_urls = [url.strip() for url in chosen_urls[1:count]]
-
-    return main_url, related_urls
+    chosen_url = response.choices[0].message.content.strip()
+    if chosen_url.startswith("URL: "):
+        chosen_url = chosen_url.replace("URL: ", "").strip()
+    return chosen_url
 
 def provide_detailed_answer(question, final_url, data, language):
     if not final_url:
@@ -196,8 +195,8 @@ def provide_detailed_answer(question, final_url, data, language):
     detailed_answer += f" [1{{{final_url}}}]"  # Append the source URL
     return detailed_answer
 
-def recommend_related_content(scored_urls, exclude_urls, count=2):
-    related_content = [(score, url, title) for score, url, title, meta in scored_urls if url not in exclude_urls]
+def recommend_related_content(scored_urls, exclude_url, count=2):
+    related_content = [(score, url, title) for score, url, title, meta in scored_urls if url != exclude_url]
     return related_content[:count]
 
 # Main execution when 'Find Best Match' button is pressed
@@ -211,18 +210,18 @@ if st.button("Find Best Match"):
         # Check if data is loaded successfully
         if st.session_state['data_loaded'] and st.session_state['data']:
             scored_urls = find_best_match(question, st.session_state['data'])
-            main_url, related_urls = choose_best_urls(question, scored_urls)
-            if main_url:
-                st.write("Chosen URL:", main_url)
+            final_url = choose_best_url(question, scored_urls)
+            if final_url:
+                st.write("Chosen URL:", final_url)
                 language = country_languages.get(country_choice, 'en')
-                detailed_answer = provide_detailed_answer(question, main_url, st.session_state['data'], language)
+                detailed_answer = provide_detailed_answer(question, final_url, st.session_state['data'], language)
                 st.write("Detailed Answer:", detailed_answer)
                 
                 # Recommend related content
-                recommended_urls = recommend_related_content(scored_urls, [main_url])
-                if recommended_urls:
+                related_content = recommend_related_content(scored_urls, final_url)
+                if related_content:
                     st.write("Recommended related content URLs:")
-                    for idx, (score, url, title) in enumerate(recommended_urls, start=2):  # Start indexing from 2 for related content
+                    for idx, (score, url, title) in enumerate(related_content, start=2):  # Start indexing from 2 for related content
                         st.write(f"[{idx}{{{url}}}] Title: {title}")
                 else:
                     st.write("No related content found.")
