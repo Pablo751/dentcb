@@ -13,7 +13,7 @@ client = OpenAI()
 # Define the CSV files based on country selection
 csv_files = {
     'France': 'Dentaly URLS - Dentaly FR.csv',
-    'US': '/Users/juanpablocasadobissone/Downloads/Dentaly URLS - Dentaly US.csv',
+    'US': 'Dentaly URLS - Dentaly US.csv',
     'UK': 'Dentaly URLS - Dentaly UK.csv',
     'Germany': 'Dentaly URLS - Dentaly DE.csv',
     'Spain': 'Dentaly URLS - Dentaly ES.csv',
