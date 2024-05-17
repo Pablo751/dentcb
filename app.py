@@ -20,6 +20,16 @@ csv_files = {
     'Italy': 'Dentaly URLS - DD.csv',
 }
 
+# Mapping countries to languages
+country_languages = {
+    'France': 'fr',
+    'US': 'en',
+    'UK': 'en',
+    'Germany': 'de',
+    'Spain': 'es',
+    'Italy': 'it',
+}
+
 # Initialize or reset session state if needed
 if 'data_loaded' not in st.session_state or 'data' not in st.session_state:
     st.session_state['data_loaded'] = False
@@ -151,25 +161,28 @@ def choose_best_url(question, scored_urls):
     chosen_url = response.choices[0].message.content.strip()
     return chosen_url
 
-def provide_detailed_answer(question, final_url, data):
+def provide_detailed_answer(question, final_url, data, language):
     if not final_url:
         return "No URL was chosen for the question."
 
     normalized_final_url = final_url.strip().lower()
-    page_detail = next((row['Page Detail'] for row in data if row['url'].strip().lower() == normalized_final_url), None)
-    
-    # Debugging: Print all URLs to see if there's a matching issue
-    for row in data:
-        print(f"Checking URL: {row['url'].strip().lower()}")
+    retries = 3
+
+    for attempt in range(retries):
+        page_detail = next((row['Page Detail'] for row in data if row['url'].strip().lower() == normalized_final_url), None)
+        
+        if page_detail:
+            break
+        else:
+            print(f"Attempt {attempt + 1}: No page detail found for URL: {normalized_final_url}")
 
     if not page_detail:
-        print(f"No page detail found for URL: {normalized_final_url}")
         return "No additional details found for the selected URL."
 
     prompt = f"Question: {question}\n\n"
     prompt += f"Selected URL: {final_url}\n\n"
     prompt += f"Page Detail: {page_detail}\n\n"
-    prompt += "Based on the Page Detail information, provide a comprehensive answer to the question. Always answer in the content original language. For example, you can get the language from the page content (if its in english answer in english) or the path (example '/us/' would be english)"
+    prompt += f"Based on the Page Detail information, provide a comprehensive answer to the question in {language}."
     
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -198,7 +211,8 @@ if st.button("Find Best Match"):
             final_url = choose_best_url(question, scored_urls)
             if final_url:
                 st.write("Chosen URL:", final_url)
-                detailed_answer = provide_detailed_answer(question, final_url, st.session_state['data'])
+                language = country_languages.get(country_choice, 'en')
+                detailed_answer = provide_detailed_answer(question, final_url, st.session_state['data'], language)
                 st.write("Detailed Answer:", detailed_answer)
                 
                 # Recommend related content
