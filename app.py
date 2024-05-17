@@ -39,16 +39,20 @@ def load_data(csv_file_path):
         try:
             with open(csv_file_path, mode='r', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
-                st.session_state['data'] = list(reader)  # Read the entire CSV file into a list
+                data = list(reader)  # Read the entire CSV file into a list
+            st.session_state['data'] = data
             st.session_state['data_loaded'] = True
             st.session_state['csv_file_path'] = csv_file_path
             print(f"Data loaded successfully from {csv_file_path}")
+            return data
         except FileNotFoundError:
             st.error(f"File not found: {csv_file_path}")
             st.session_state['data_loaded'] = False
             st.session_state['data'] = None
+            return None
     else:
         print(f"Data already loaded from {csv_file_path}")
+        return st.session_state['data']
 
 # Function to extract the main keywords using the GPT model
 def extract_main_keywords(question):
@@ -154,7 +158,12 @@ def provide_detailed_answer(question, final_url, data):
     normalized_final_url = final_url.strip().lower()
     page_detail = next((row['Page Detail'] for row in data if row['url'].strip().lower() == normalized_final_url), None)
     
+    # Debugging: Print all URLs to see if there's a matching issue
+    for row in data:
+        print(f"Checking URL: {row['url'].strip().lower()}")
+
     if not page_detail:
+        print(f"No page detail found for URL: {normalized_final_url}")
         return "No additional details found for the selected URL."
 
     prompt = f"Question: {question}\n\n"
@@ -168,15 +177,20 @@ def provide_detailed_answer(question, final_url, data):
     )
 
     detailed_answer = response.choices[0].message.content.strip()
+    detailed_answer += f" [1{{{final_url}}}]"  # Append the source URL
     return detailed_answer
 
-# Main Streamlit execution when 'Find Best Match' button is pressed
+def recommend_related_content(scored_urls, exclude_url, count=2):
+    related_content = [(score, url, title) for score, url, title, meta in scored_urls if url != exclude_url]
+    return related_content[:count]
+
+# Main execution when 'Find Best Match' button is pressed
 if st.button("Find Best Match"):
     if not question or not csv_file_path:
         st.write("Please make sure to select a country and enter a question.")
     else:
         # Load the data
-        load_data(csv_file_path)
+        data = load_data(csv_file_path)
         
         # Check if data is loaded successfully
         if st.session_state['data_loaded'] and st.session_state['data']:
@@ -186,8 +200,16 @@ if st.button("Find Best Match"):
                 st.write("Chosen URL:", final_url)
                 detailed_answer = provide_detailed_answer(question, final_url, st.session_state['data'])
                 st.write("Detailed Answer:", detailed_answer)
+                
+                # Recommend related content
+                related_content = recommend_related_content(scored_urls, final_url)
+                if related_content:
+                    st.write("Recommended related content URLs:")
+                    for idx, (score, url, title) in enumerate(related_content, start=2):  # Start indexing from 2 for related content
+                        st.write(f"[{idx}{{{url}}}] Title: {title}")
+                else:
+                    st.write("No related content found.")
             else:
                 st.write("No URL could be selected based on the question.")
         else:
             st.write("Failed to load data. Please check the CSV file path.")
-
