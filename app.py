@@ -91,7 +91,7 @@ def count_keyword_matches_script1(row, main_keywords):
             if any(kw in field_item for kw in main_keywords):
                 field_score += partial_match_score * multiplier
             if any(kw == field_item for kw in main_keywords):
-                field_score += (exact match_score - partial match_score) * multiplier
+                field_score += (exact_match_score - partial_match_score) * multiplier
         return field_score
 
     score += score_matches(top_queries)
