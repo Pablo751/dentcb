@@ -184,16 +184,16 @@ def provide_detailed_answer(question, final_url, data, language):
     prompt = f"Question: {question}\n\n"
     prompt += f"Selected URL: {final_url}\n\n"
     prompt += f"Page Detail: {page_detail}\n\n"
-    prompt += f"Based on the Page Detail information, provide a concise preview of the answer to the question in {language}, ending with '... Click the link to read more'."
-
+    prompt += f"Based on the Page Detail information, provide a brief glimpse of the answer to the question in {language}, inviting the user to click on the URL for more details."
+    
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": prompt}]
     )
 
-    preview_answer = response.choices[0].message.content.strip()
-    preview_answer += f" ... [Click the link to read more{{{final_url}}}]"
-    return preview_answer
+    brief_answer = response.choices[0].message.content.strip()
+    brief_answer += f" Click here for more details: [1{{{final_url}}}]"  # Append the source URL with an invitation to click
+    return brief_answer
 
 def recommend_related_content(scored_urls, exclude_url, count=2):
     related_content = [(score, url, title) for score, url, title, meta in scored_urls if url != exclude_url]
