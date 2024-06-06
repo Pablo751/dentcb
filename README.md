@@ -79,10 +79,10 @@ The script imports several modules:
 To run the script, execute the following command in your terminal:
 
 ```bash
-python script_name.py
+python app.py
 ```
 
-Replace `script_name.py` with the name of your script file. The script will prompt you for a URL and a question, and then it will process the input to find and recommend the most relevant Dentaly URLs.
+The script will prompt you for a URL and a question, and then it will process the input to find and recommend the most relevant Dentaly URLs.
 
 ### Example Usage
 
@@ -94,11 +94,6 @@ if __name__ == "__main__":
     test_question = "What are the benefits of dental implants?"
     main(test_url, test_question)
 ```
-
-## Notes
-
-- Ensure that the CSV files are in the correct format and located in the same directory as the script.
-- The script relies on the OpenAI API for keyword extraction and response generation, so an active internet connection is required.
 
 ## License
 
